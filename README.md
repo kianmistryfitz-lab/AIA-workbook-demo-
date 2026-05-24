@@ -30,7 +30,7 @@ Tracking to show what has and hasn't been completed.
 
 For teachers:
 Full workbook editor, create subjects, chapters, and pages
-11 content block types: questions, text extracts, PETAL paragraphs, 
+11 content block types: questions, text extracts, 
 YouTube links, vocab boxes, concept boxes, images, and more.
 Page types match AIA's real lesson structure, Ignite, Explore, 
 Apply, Reflect. There is an answers tab to see exactly what a student has written on any page.
