@@ -3,10 +3,6 @@ A student built workbook designed to fix the issues facing the current workbooks
 
 AIA Workbook Platform
 
-A student-built workbook platform designed to fix the real problems 
-with AIA's current system.
-
-
 
 The problem
 
