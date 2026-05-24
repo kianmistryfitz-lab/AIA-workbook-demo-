@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIA Workbooks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Lora:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:"Plus Jakarta Sans",sans-serif;background:#f0ede8;color:#1c1a17;font-size:14px}
+input,textarea,select,button{font-family:inherit;font-size:inherit}
+textarea{resize:vertical}
+:root{
+  --sb:#f7f5f2;--card:#fff;--bg:#f0ede8;
+  --bd:#e3dfd8;--bd2:#ccc8c0;
+  --t1:#1c1a17;--t2:#5e5a54;--t3:#a09a92;
+  --navy:#1a2744;--navy-l:#e8ecf5;
+  --red:#cc1414;--red-l:#fde8e8;
+  --done:#059669;--done-l:#d1fae5;--done-b:#6ee7b7;
+  --prog:#d97706;
+  --r4:4px;--r6:6px;--r8:8px;--r12:12px;--r16:16px;
+  --sh:0 1px 3px rgba(0,0,0,.07);--sh-md:0 4px 14px rgba(0,0,0,.1);
+}
+/* SHELL */
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:268px;flex-shrink:0;background:var(--sb);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--card)}
+/* SIDEBAR */
+.sb-top{padding:14px 14px 12px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.sb-logo{font-family:"Lora",serif;font-weight:600;font-size:15px;color:var(--navy);display:block;margin-bottom:10px;letter-spacing:-.2px}
+.sb-logo span{color:var(--red)}
+.mode-pill{display:flex;border:1px solid var(--bd2);border-radius:20px;overflow:hidden}
+.mode-btn{flex:1;padding:6px;font-size:12px;font-weight:600;color:var(--t2);background:transparent;border:none;cursor:pointer;text-align:center;transition:all .15s}
+.mode-btn.on{background:var(--navy);color:#fff}
+.sb-tree{flex:1;overflow-y:auto;padding:8px 0}
+.sb-bottom{padding:10px 12px;border-top:1px solid var(--bd);flex-shrink:0}
+/* TREE */
+.tree-subj-row{display:flex;align-items:center;gap:6px;padding:7px 10px 7px 12px;border-radius:var(--r6);cursor:pointer;user-select:none}
+.tree-subj-row:hover{background:var(--bd)}
+.tree-si{width:22px;height:22px;border-radius:var(--r4);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.tree-sn{font-size:13px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tree-chev{font-size:11px;color:var(--t3);transition:transform .15s;flex-shrink:0}
+.tree-chev.open{transform:rotate(90deg)}
+.tree-acts{display:flex;gap:2px;opacity:0;flex-shrink:0}
+.tree-subj-row:hover .tree-acts,.tree-chap-row:hover .tree-acts,.tree-page-row:hover .tree-acts{opacity:1}
+.tree-btn{padding:2px 5px;background:transparent;border:none;cursor:pointer;color:var(--t3);border-radius:var(--r4);font-size:13px}
+.tree-btn:hover{background:var(--bd2);color:var(--t1)}
+.tree-chaps{padding-left:16px}
+.tree-chap-row{display:flex;align-items:center;gap:6px;padding:5px 8px 5px 10px;border-radius:var(--r6);cursor:pointer;user-select:none}
+.tree-chap-row:hover{background:var(--bd)}
+.tree-cn{font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t2)}
+.tree-pages{padding-left:14px}
+.tree-page-row{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:var(--r6);cursor:pointer;user-select:none}
+.tree-page-row:hover{background:var(--bd)}
+.tree-page-row.active{background:var(--card);border-left:2px solid var(--subj-color,var(--navy));padding-left:6px;box-shadow:var(--sh)}
+.tree-pn{font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t2)}
+.tree-page-row.active .tree-pn{color:var(--t1);font-weight:500}
+.tree-add{display:flex;align-items:center;gap:5px;padding:5px 10px;font-size:12px;color:var(--t3);cursor:pointer;border-radius:var(--r6);border:none;background:transparent;width:100%;margin-top:2px}
+.tree-add:hover{background:var(--bd);color:var(--t2)}
+/* RENAME INLINE FORM */
+.rename-form{display:flex;align-items:center;gap:4px;padding:4px 8px;margin:2px 4px}
+.rename-input{flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:var(--r6);font-size:12px;font-weight:500;outline:none;background:var(--card);color:var(--t1)}
+.rename-ok{padding:4px 8px;background:var(--navy);color:#fff;border:none;border-radius:var(--r6);cursor:pointer;font-size:12px}
+.rename-cancel{padding:4px 6px;background:transparent;border:none;cursor:pointer;color:var(--t3);font-size:13px}
+/* QUICK FORMS */
+.qf{background:var(--card);border:1px solid var(--bd);border-radius:var(--r8);padding:10px;margin:4px 8px;box-shadow:var(--sh)}
+.qf input{width:100%;padding:6px 10px;border:1px solid var(--bd);border-radius:var(--r6);font-size:12px;outline:none;background:var(--card);color:var(--t1);margin-bottom:7px}
+.qf input:focus{border-color:#93c5fd}
+.ql{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qf-row{display:flex;gap:5px;margin-top:2px}
+.cdots{display:flex;gap:5px;margin-bottom:7px}
+.cdot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0}
+.cdot.sel{border-color:var(--t1)}
+.type-chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:7px}
+.type-chip{padding:3px 8px;border:1px solid var(--bd);border-radius:12px;font-size:11px;font-weight:500;cursor:pointer;background:transparent;color:var(--t2)}
+.type-chip.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
+/* MAIN */
+.main-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--t3)}
+.main-empty i{font-size:38px;opacity:.3}
+.page-hdr-bar{padding:14px 24px 12px;border-bottom:1px solid var(--bd);flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.page-title-i{font-family:"Lora",serif;font-size:20px;font-weight:600;border:none;outline:none;background:transparent;color:var(--t1);width:100%;line-height:1.3}
+.page-title-i::placeholder{color:var(--t3)}
+.page-sec-i{font-size:12px;border:none;outline:none;background:transparent;color:var(--t3);width:120px}
+.page-sec-i::placeholder{color:var(--bd2)}
+.page-scroll{flex:1;overflow-y:auto;padding:20px 24px}
+/* BLOCKS */
+.bwrap{position:relative;margin-bottom:12px;border-radius:var(--r8);border:1.5px solid transparent;transition:border-color .12s}
+.bwrap:hover{border-color:var(--bd)}
+.bwrap.editing{border-color:#93c5fd!important}
+.bhbar{position:absolute;top:5px;right:5px;display:none;gap:3px;z-index:5}
+.bwrap:hover .bhbar{display:flex}
+.bwrap.editing .bhbar{display:none}
+.bhb{padding:3px 7px;background:var(--card);border:1px solid var(--bd);border-radius:var(--r6);font-size:11px;cursor:pointer;color:var(--t2);box-shadow:var(--sh)}
+.bhb:hover{background:var(--bg);color:var(--t1)}
+.bhb.del:hover{background:#fee2e2;color:#dc2626;border-color:#fecaca}
+/* INLINE FORM */
+.iform{background:var(--sb);border:1.5px solid #93c5fd;border-radius:var(--r8);padding:12px;margin-bottom:12px}
+.il{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;display:block}
+.ii{width:100%;padding:7px 10px;border:1px solid var(--bd);border-radius:var(--r6);font-size:13px;outline:none;background:var(--card);color:var(--t1);margin-bottom:8px}
+.ii:focus{border-color:#93c5fd}
+.ita{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:var(--r6);font-size:13px;outline:none;background:var(--card);color:var(--t1);line-height:1.65;resize:vertical;margin-bottom:8px;min-height:64px}
+.ita:focus{border-color:#93c5fd}
+.igrid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.inum{padding:7px 10px;border:1px solid var(--bd);border-radius:var(--r6);font-size:13px;outline:none;background:var(--card);color:var(--t1);width:100%}
+.inum:focus{border-color:#93c5fd}
+.iacts{display:flex;justify-content:flex-end;gap:6px;margin-top:2px}
+.linkrow{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.ct-btns{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.ctb{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;border:2px solid transparent}
+.ctb.sel{border-color:var(--t1)!important}
+/* BLOCK PICKER */
+.bpicker{background:var(--card);border:1px solid var(--bd);border-radius:var(--r8);padding:10px;box-shadow:var(--sh-md);margin-bottom:12px}
+.bpicker-lbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:block}
+.bpicker-grid{display:flex;flex-wrap:wrap;gap:5px}
+.bpb{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid var(--bd);border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--t2)}
+.bpb:hover{border-color:var(--navy);background:var(--navy-l);color:var(--navy)}
+.add-bar{display:flex;justify-content:center;padding:8px 0}
+.add-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border:1.5px dashed var(--bd2);border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--t3)}
+.add-btn:hover{border-color:var(--navy);color:var(--navy);background:var(--navy-l)}
+/* STUDENT BLOCKS */
+.sb-body{font-size:13px;color:var(--t2);line-height:1.75}
+.sb-concept{padding:12px 14px;border-radius:var(--r8);border:1px solid;font-size:13px;line-height:1.6;margin-bottom:0}
+.sb-ctitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.sb-q{border:1px solid var(--bd);border-radius:var(--r8);overflow:hidden}
+.sb-qhdr{padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.sb-qta{width:100%;padding:10px 12px;font-size:13px;border:none;outline:none;background:var(--card);color:var(--t1);resize:vertical;font-family:inherit;line-height:1.65;min-height:72px}
+.sb-extract{padding:12px 14px;border-left:3px solid var(--subj-color,var(--navy));background:var(--bg);border-radius:0 var(--r8) var(--r8) 0;font-size:13px;line-height:1.85;color:var(--t1)}
+.sb-petal{border:1px solid var(--bd);border-radius:var(--r8);overflow:hidden}
+.prow{display:grid;grid-template-columns:60px 1fr;border-bottom:1px solid var(--bd)}
+.prow:last-child{border-bottom:none}
+.plbl{padding:9px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.pta{width:100%;padding:9px 11px;font-size:13px;border:none;outline:none;background:var(--card);color:var(--t1);resize:vertical;font-family:inherit;line-height:1.6;min-height:46px;border-left:1px solid var(--bd)}
+.sb-yt{border:1px solid var(--bd);border-radius:var(--r8);overflow:hidden}
+.sb-ythumb{background:var(--bg);height:88px;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer}
+.sb-ytinfo{padding:9px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sb-links{display:flex;flex-direction:column;gap:5px}
+.sb-link{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid var(--bd);border-radius:var(--r8);cursor:pointer}
+.sb-link:hover{border-color:var(--bd2);background:var(--bg)}
+.sb-diag{background:var(--bg);border:1px dashed var(--bd2);border-radius:var(--r8);height:86px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px}
+.sb-il{padding:11px 13px;border-radius:var(--r8);border:1px solid}
+.sb-iltitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.sb-vocab{padding:11px 14px;border:2px solid var(--navy);border-radius:var(--r8);background:var(--navy-l)}
+.sb-vocab-title{font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+.sb-vocab-terms{display:flex;flex-wrap:wrap;gap:6px}
+.sb-vocab-term{font-size:12px;font-weight:600;color:var(--navy);background:var(--card);padding:3px 9px;border-radius:12px;border:1px solid var(--bd2)}
+/* AIA TASK BOX */
+.aia-task-box{border:1px solid var(--bd);border-radius:var(--r8);overflow:hidden;margin-bottom:14px}
+.aia-task-hdr{display:grid;grid-template-columns:64px 1fr;min-height:64px}
+.aia-task-icon{display:flex;align-items:center;justify-content:center;background:#e8e8e8}
+.aia-task-icon img{width:38px;height:38px;object-fit:contain}
+.aia-task-body{padding:10px 12px;background:#f0f0f0;border-left:1px solid var(--bd2)}
+.aia-task-type{font-size:11px;font-weight:500;color:var(--t2);margin-bottom:2px}
+.aia-task-desc{font-size:12px;color:var(--t2);line-height:1.4;margin-bottom:4px}
+.aia-task-name{font-size:15px;font-weight:700;margin-bottom:0}
+.aia-task-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:3px 10px;border:1px solid var(--bd2);font-size:11px;font-weight:600;border-radius:var(--r4);background:var(--card)}
+/* STUDENT WB */
+.wb-sidebar{width:210px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--sb)}
+.wb-sbhdr{padding:10px 12px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.wb-sbhdr-top{height:4px;background:var(--red);margin:-10px -12px 10px;border-radius:0}
+.wb-sblist{flex:1;overflow-y:auto;padding:4px 0}
+.wb-prow{width:100%;display:flex;align-items:flex-start;gap:6px;padding:5px 8px 5px 10px;background:transparent;border:none;border-left:2px solid transparent;cursor:pointer;text-align:left}
+.wb-prow.active{background:var(--card);border-left-color:var(--subj-color,var(--navy))}
+.wb-prow:hover:not(.active){background:var(--bd)}
+.wb-sec{padding:7px 10px 2px;font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em}
+.wdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.wb-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.wb-phdr{padding:0 18px 0 0;border-bottom:1px solid var(--bd);display:flex;align-items:stretch;flex-shrink:0}
+.wb-phdr-accent{width:4px;flex-shrink:0;border-radius:0}
+.wb-phdr-content{flex:1;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wb-content{flex:1;overflow-y:auto;padding:18px 20px}
+.wb-nav{padding:9px 18px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:center;gap:12px;flex-shrink:0}
+.pg-pill{display:inline-flex;align-items:stretch;border:1px solid var(--bd2);border-radius:24px;overflow:hidden;background:var(--bg);box-shadow:var(--sh)}
+.pgarr{padding:0 13px;background:transparent;border:none;font-size:13px;color:var(--t2);cursor:pointer;height:34px;display:flex;align-items:center}
+.pgarr:hover:not(:disabled){background:var(--bd);color:var(--t1)}
+.pgarr:disabled{opacity:.3;cursor:default}
+.pgdiv{width:1px;background:var(--bd2)}
+.pgni{width:50px;text-align:center;border:none;outline:none;background:transparent;font-size:13px;font-weight:700;color:var(--t1);font-family:inherit;height:34px;padding:0}
+.pgni::-webkit-inner-spin-button,.pgni::-webkit-outer-spin-button{-webkit-appearance:none}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r8);font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.btn-p{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-p:hover{background:#0f1a35}
+.btn-s{background:var(--card);color:var(--t1);border-color:var(--bd)}
+.btn-s:hover{background:var(--bg);border-color:var(--bd2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-g{color:var(--t2);padding:5px 8px}
+.btn-g:hover{background:var(--bg);color:var(--t1)}
+.btn-done{background:var(--done-l);color:var(--done);border-color:var(--done-b)}
+.btn-done:hover{background:#a7f3d0}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.badge-ignite{background:#fff7ed;color:#c2410c}
+.badge-explore{background:#dbeafe;color:#1d4ed8}
+.badge-apply{background:#dcfce7;color:#15803d}
+.badge-reflect{background:#eef2ff;color:#4338ca}
+.badge-resource{background:#f1f5f9;color:#475569}
+.badge-video{background:#fee2e2;color:#b91c1c}
+.badge-link{background:#f1f5f9;color:#475569}
+.badge-lecture{background:#e8ecf5;color:#1a2744}
+.prog-track{height:3px;background:var(--bd);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;transition:width .4s}
+.sv-flash{font-size:12px;color:var(--done);opacity:0;transition:opacity .3s}
+.sv-flash.show{opacity:1}
+/* MODAL */
+#modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center}
+.modal{background:var(--card);border-radius:var(--r12);padding:20px;width:320px;box-shadow:var(--sh-md)}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.modal p{font-size:13px;color:var(--t2);margin-bottom:16px}
+.modal-acts{display:flex;justify-content:flex-end;gap:7px}
+</style>
+</head>
+<body>
+<div id="app"><div id="sidebar"></div><div id="main"></div></div>
+<div id="modal-ov" onclick="closeMd()"></div>
+<script>
+// DATA
+let db={subjects:[],answers:{},progress:{},watched:{}};
+let st={mode:'teacher',sid:null,cid:null,pid:null,exS:{},exC:{},addS:false,addC:null,addP:null,editB:null,showPick:false,pickAfter:null,renameS:null,renameC:null,showAnswers:false,showThemes:false};
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function save(){localStorage.setItem('aia-wb-v4',JSON.stringify(db));}
+function load(){try{const s=localStorage.getItem('aia-wb-v4');if(s)db=JSON.parse(s);}catch(e){}}
+const THEMES=[
+  {id:'warm',    name:'Warm',   swatch:'#f0ede8', dot:'#1a2744',
+   vars:{'--sb':'#f7f5f2','--card':'#ffffff','--bg':'#f0ede8','--bd':'#e3dfd8','--bd2':'#ccc8c0','--t1':'#1c1a17','--t2':'#5e5a54','--t3':'#a09a92','--navy':'#1a2744','--navy-l':'#e8ecf5','--red':'#cc1414','--red-l':'#fde8e8'}},
+  {id:'dark',    name:'Dark',   swatch:'#141720', dot:'#5b8def',
+   vars:{'--sb':'#141720','--card':'#1a1d27','--bg':'#0f1117','--bd':'#2a2d3a','--bd2':'#3d4055','--t1':'#e8eaf2','--t2':'#8b90a8','--t3':'#4a5070','--navy':'#5b8def','--navy-l':'#1a2540','--red':'#e05555','--red-l':'#3a1a1a'}},
+  {id:'ocean',   name:'Ocean',  swatch:'#e8f2f8', dot:'#1a4a9a',
+   vars:{'--sb':'#dceaf5','--card':'#f4f9ff','--bg':'#e8f2f8','--bd':'#bdd4e8','--bd2':'#9ab8d0','--t1':'#0c1f3a','--t2':'#3a5878','--t3':'#7090b0','--navy':'#1a4a9a','--navy-l':'#d4e4f8','--red':'#c43030','--red-l':'#fde8e8'}},
+  {id:'forest',  name:'Forest', swatch:'#e8f0e8', dot:'#1a5a2a',
+   vars:{'--sb':'#dceadc','--card':'#f4f8f4','--bg':'#e8f0e8','--bd':'#bdd4bd','--bd2':'#9ab89a','--t1':'#0f2010','--t2':'#3a5a3a','--t3':'#70906a','--navy':'#1a5a2a','--navy-l':'#d4ecd4','--red':'#c03a20','--red-l':'#fde8e4'}},
+  {id:'slate',   name:'Slate',  swatch:'#eef0f5', dot:'#2d3a8c',
+   vars:{'--sb':'#e4e8f0','--card':'#ffffff','--bg':'#eef0f5','--bd':'#d0d5e4','--bd2':'#b4bcd0','--t1':'#1a1c28','--t2':'#50566e','--t3':'#90969e','--navy':'#2d3a8c','--navy-l':'#e0e4f8','--red':'#c02244','--red-l':'#fde4ec'}},
+  {id:'rose',    name:'Rose',   swatch:'#fdf0f3', dot:'#8c2050',
+   vars:{'--sb':'#f8e8ed','--card':'#fff8f9','--bg':'#fdf0f3','--bd':'#e8d0d8','--bd2':'#d0b0bc','--t1':'#2d1a20','--t2':'#6a3a48','--t3':'#b08090','--navy':'#8c2050','--navy-l':'#f4d8e4','--red':'#cc2040','--red-l':'#fde4ec'}},
+];
+let activeTheme='warm';
+function applyTheme(id){
+  const t=THEMES.find(t=>t.id===id)||THEMES[0];
+  activeTheme=t.id;
+  Object.entries(t.vars).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
+  localStorage.setItem('aia-theme',t.id);
+  renderSB(); // re-render sidebar to update selected state
+}
+function loadTheme(){
+  const saved=localStorage.getItem('aia-theme');
+  if(saved)applyTheme(saved);
+}
+function gS(id){return db.subjects.find(s=>s.id===id);}
+function gC(sid,cid){return gS(sid)?.chapters?.find(c=>c.id===cid);}
+function gP(sid,cid,pid){return gC(sid,cid)?.pages?.find(p=>p.id===pid);}
+function wPages(pages){return(pages||[]).filter(p=>['ignite','explore','apply','reflect'].includes(p.type));}
+function tl(t){return t.charAt(0).toUpperCase()+t.slice(1);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function dCol(pid,col){const s=db.progress[pid];return s==='done'?(col||'var(--done)'):s==='in_progress'?'var(--prog)':'var(--bd2)';}
+
+const COLS=['#1a2744','#185FA5','#3B6D11','#993C1D','#534AB7','#0f766e','#b45309','#be185d'];
+const BGS=['#e8ecf5','#dbeafe','#dcfce7','#fee2e2','#ede9fe','#ccfbf1','#fef3c7','#fce7f3'];
+const ICONS=['book','math-function','flask','cpu','pencil','atom','language','music','palette','microscope'];
+
+// AIA page types 
+const PTYPES=['ignite','explore','apply','reflect','resource','video','link','lecture'];
+const PTYPE_META={
+  ignite:{bg:'#fff7ed',col:'#c2410c',bd:'#fdba74',icon:'ti-flame',label:'Ignite',desc:'Complete the introductory activity to begin your group lesson.'},
+  explore:{bg:'#dbeafe',col:'#1d4ed8',bd:'#bfdbfe',icon:'ti-search',label:'Explore',desc:'Deepen your understanding by revisiting key ideas, examples, and vocabulary from your lecture with your teacher\'s guidance.'},
+  apply:{bg:'#dcfce7',col:'#15803d',bd:'#bbf7d0',icon:'ti-pencil',label:'Apply',desc:'Use what you\'ve learned to complete tasks and activities that show your understanding and build confidence in your skills.'},
+  reflect:{bg:'#eef2ff',col:'#4338ca',bd:'#c7d2fe',icon:'ti-clock',label:'Reflect',desc:'Use this time to think about your learning, link ideas together, and consider how it connects to the real world.'},
+  resource:{bg:'#f1f5f9',col:'#475569',bd:'#cbd5e1',icon:'ti-file-text',label:'Resource',desc:'Reference material — no answers needed.'},
+  video:{bg:'#fee2e2',col:'#b91c1c',bd:'#fecaca',icon:'ti-brand-youtube',label:'Video',desc:'Watch this video as part of your lesson.'},
+  link:{bg:'#f1f5f9',col:'#475569',bd:'#cbd5e1',icon:'ti-link',label:'Links',desc:'Useful external resources.'},
+  lecture:{bg:'#e8ecf5',col:'#1a2744',bd:'#b8c4e0',icon:'ti-notes',label:'Lecture Notes',desc:'Notes and resources from your online lecture.'},
+};
+
+const BDEFS=[
+  {t:'taskbox',i:'ti-layout-rows',l:'Task Header'},
+  {t:'body',i:'ti-text',l:'Text'},
+  {t:'question',i:'ti-question-mark',l:'Question'},
+  {t:'vocab',i:'ti-abc',l:'Vocabulary'},
+  {t:'extract',i:'ti-quote',l:'Text Extract'},
+  {t:'concept',i:'ti-bulb',l:'Concept Box'},
+  {t:'petal',i:'ti-flower',l:'PETAL'},
+  {t:'youtube',i:'ti-brand-youtube',l:'YouTube'},
+  {t:'links',i:'ti-link',l:'Links'},
+  {t:'diagram',i:'ti-photo',l:'Diagram'},
+  {t:'infolist',i:'ti-list',l:'Info List'},
+];
+
+const PETROWS=[{k:'P',l:'Point',bg:'#dbeafe',c:'#1d4ed8'},{k:'E',l:'Evidence',bg:'#dcfce7',c:'#15803d'},{k:'T',l:'Technique',bg:'#fef9c3',c:'#854d0e'},{k:'A',l:'Analysis',bg:'#fee2e2',c:'#b91c1c'},{k:'L',l:'Link',bg:'#ede9fe',c:'#6d28d9'}];
+const CTHEMES=[{bg:'#dbeafe',c:'#1d4ed8',bd:'#bfdbfe',n:'Blue'},{bg:'#dcfce7',c:'#15803d',bd:'#bbf7d0',n:'Green'},{bg:'#fef9c3',c:'#854d0e',bd:'#fef08a',n:'Yellow'},{bg:'#fee2e2',c:'#b91c1c',bd:'#fecaca',n:'Red'},{bg:'#f1f5f9',c:'#334155',bd:'#cbd5e1',n:'Grey'}];
+let qfC=COLS[0],qfBg=BGS[0],qfI='book',qfT='ignite';
+
+// RENDER 
+function render(){renderSB();renderMain();}
+function renderSB(){document.getElementById('sidebar').innerHTML=getSB();}
+function renderMain(){
+  const el=document.getElementById('main');
+  if(st.mode==='student'){el.innerHTML=getStudentView();return;}
+  if(!st.pid){el.innerHTML=`<div class="main-empty"><i class="ti ti-layout-sidebar-right-inactive"></i><p>Select a page from the sidebar to edit.</p></div>`;return;}
+  const p=gP(st.sid,st.cid,st.pid);
+  if(!p){el.innerHTML=`<div class="main-empty"><i class="ti ti-alert-circle"></i><p>Page not found.</p></div>`;return;}
+  const s=gS(st.sid);
+  el.style.setProperty('--subj-color',s?.color||'#1a2744');
+  el.innerHTML=getEditor(p,s);
+}
+
+// SIDEBAR
+function getSB(){
+  const tree=db.subjects.map(s=>{
+    const exp=st.exS[s.id];
+    const chapHtml=!exp?'':
+      `<div class="tree-chaps">${(s.chapters||[]).map(c=>{
+        const ce=st.exC[c.id];
+        const pages=!ce?'':`<div class="tree-pages">
+          ${(c.pages||[]).map(p=>{
+            const m=PTYPE_META[p.type]||PTYPE_META.resource;
+            return `<div class="tree-page-row ${p.id===st.pid?'active':''}" style="--subj-color:${s.color}" onclick="selPage('${s.id}','${c.id}','${p.id}')">
+              <span class="wdot" style="background:${dCol(p.id,s.color)};flex-shrink:0"></span>
+              <span class="tree-pn">${esc(p.title)}</span>
+              <div class="tree-acts">
+                <button class="tree-btn" onclick="event.stopPropagation();confDel('page','${p.id}','${esc(p.title)}')" title="Delete"><i class="ti ti-trash" style="font-size:11px"></i></button>
+              </div>
+            </div>`;
+          }).join('')}
+          ${st.addP===c.id?getAddPageForm(s.id,c.id):''}
+          <button class="tree-add" onclick="startAddPage('${s.id}','${c.id}')"><i class="ti ti-plus" style="font-size:11px"></i> Add page</button>
+        </div>`;
+        const chapRow = st.renameC===c.id
+          ? `<div class="rename-form">
+              <i class="ti ti-book-2" style="font-size:13px;color:var(--t3);flex-shrink:0"></i>
+              <input class="rename-input" id="rc-name-${c.id}" value="${esc(c.name)}" placeholder="Name" onkeydown="if(event.key==='Enter')saveRenameC('${c.id}');if(event.key==='Escape'){st.renameC=null;renderSB();}">
+              <input class="rename-input" id="rc-unit-${c.id}" value="${esc(c.unit)}" placeholder="Unit" style="flex:1.5" onkeydown="if(event.key==='Enter')saveRenameC('${c.id}');if(event.key==='Escape'){st.renameC=null;renderSB();}">
+              <button class="rename-ok" onclick="saveRenameC('${c.id}')"><i class="ti ti-check" style="font-size:11px"></i></button>
+              <button class="rename-cancel" onclick="st.renameC=null;renderSB()"><i class="ti ti-x" style="font-size:12px"></i></button>
+            </div>`
+          : `<div class="tree-chap-row" onclick="toggleC('${c.id}')">
+              <i class="ti ti-chevron-right tree-chev ${ce?'open':''}" style="font-size:10px"></i>
+              <span class="tree-cn">${esc(c.name)} — ${esc(c.unit)}</span>
+              <div class="tree-acts">
+                <button class="tree-btn" onclick="event.stopPropagation();startRenameC('${c.id}')" title="Rename"><i class="ti ti-pencil" style="font-size:11px"></i></button>
+                <button class="tree-btn" onclick="event.stopPropagation();confDel('chap','${c.id}','${esc(c.name)}')" title="Delete"><i class="ti ti-trash" style="font-size:11px"></i></button>
+              </div>
+            </div>`;
+        return `<div>${chapRow}${pages}</div>`;
+      }).join('')}
+      ${st.addC===s.id?getAddChapForm(s.id):''}
+      <button class="tree-add" style="padding-left:10px" onclick="startAddChap('${s.id}')"><i class="ti ti-plus" style="font-size:11px"></i> New workbook</button>
+      </div>`;
+    const subjRow = st.renameS===s.id
+      ? `<div class="rename-form">
+          <div class="tree-si" style="background:${s.bg};flex-shrink:0"><i class="ti ti-${s.icon||'book'}" style="color:${s.color};font-size:12px"></i></div>
+          <input class="rename-input" id="rs-${s.id}" value="${esc(s.name)}" onkeydown="if(event.key==='Enter')saveRenameS('${s.id}');if(event.key==='Escape'){st.renameS=null;renderSB();}">
+          <button class="rename-ok" onclick="saveRenameS('${s.id}')"><i class="ti ti-check" style="font-size:11px"></i></button>
+          <button class="rename-cancel" onclick="st.renameS=null;renderSB()"><i class="ti ti-x" style="font-size:12px"></i></button>
+        </div>`
+      : `<div class="tree-subj-row" onclick="toggleS('${s.id}')">
+          <div class="tree-si" style="background:${s.bg}"><i class="ti ti-${s.icon||'book'}" style="color:${s.color};font-size:12px"></i></div>
+          <span class="tree-sn">${esc(s.name)}</span>
+          <i class="ti ti-chevron-right tree-chev ${exp?'open':''}"></i>
+          <div class="tree-acts">
+            <button class="tree-btn" onclick="event.stopPropagation();startRenameS('${s.id}')" title="Rename"><i class="ti ti-pencil" style="font-size:11px"></i></button>
+            <button class="tree-btn" onclick="event.stopPropagation();confDel('subj','${s.id}','${esc(s.name)}')" title="Delete"><i class="ti ti-trash" style="font-size:11px"></i></button>
+          </div>
+        </div>`;
+    return `<div>${subjRow}${chapHtml}</div>`;
+  }).join('');
+
+  return `<div class="sb-top">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span class="sb-logo">AIA <span>Workbooks</span></span>
+      <button onclick="st.showThemes=!st.showThemes;renderSB()" title="Change theme"
+        style="padding:4px 7px;background:${st.showThemes?'var(--navy)':'transparent'};color:${st.showThemes?'#fff':'var(--t3)'};border:1px solid ${st.showThemes?'var(--navy)':'var(--bd)'};border-radius:var(--r6);cursor:pointer;font-size:13px;transition:all .15s">
+        <i class="ti ti-palette"></i>
+      </button>
+    </div>
+    ${st.showThemes?`<div style="margin-bottom:10px;padding:10px;background:var(--bg);border-radius:var(--r8);border:1px solid var(--bd)">
+      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Choose theme</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">
+        ${THEMES.map(t=>`<button onclick="applyTheme('${t.id}')"
+          style="border:2px solid ${activeTheme===t.id?'var(--navy)':'var(--bd)'};border-radius:var(--r6);padding:7px 4px;cursor:pointer;background:${t.swatch};display:flex;flex-direction:column;align-items:center;gap:4px;transition:border-color .15s">
+          <div style="width:12px;height:12px;border-radius:50%;background:${t.dot};flex-shrink:0"></div>
+          <span style="font-size:10px;font-weight:600;color:${t.vars['--t1']};white-space:nowrap">${t.name}</span>
+          ${activeTheme===t.id?`<i class="ti ti-check" style="font-size:10px;color:${t.dot}"></i>`:''}
+        </button>`).join('')}
+      </div>
+    </div>`:''}
+    <div class="mode-pill">
+      <button class="mode-btn ${st.mode==='teacher'?'on':''}" onclick="setMode('teacher')"><i class="ti ti-pencil" style="margin-right:3px"></i>Teacher</button>
+      <button class="mode-btn ${st.mode==='student'?'on':''}" onclick="setMode('student')"><i class="ti ti-book" style="margin-right:3px"></i>Student</button>
+    </div>
+  </div>
+  <div class="sb-tree">
+    ${db.subjects.length===0&&!st.addS?`<div style="padding:20px 14px;font-size:12px;color:var(--t3);text-align:center">No subjects yet.<br>The <em>Of Mice and Men</em> workbook is<br>already loaded below.</div>`:''}
+    ${tree}${st.addS?getAddSubjForm():''}
+  </div>
+  <div class="sb-bottom">
+    <button class="btn btn-p btn-sm" style="width:100%;margin-bottom:8px" onclick="startAddSubj()"><i class="ti ti-plus"></i> New subject</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+      <button class="btn btn-s btn-sm" onclick="exportBackup()" title="Download a JSON backup of all workbooks" style="justify-content:center"><i class="ti ti-download"></i> Backup</button>
+      <button class="btn btn-s btn-sm" onclick="triggerRestore()" title="Restore from a backup file" style="justify-content:center"><i class="ti ti-upload"></i> Restore</button>
+    </div>
+    <button class="btn btn-sm" style="width:100%;background:var(--red-l);color:var(--red);border:1px solid #f9a8a8;justify-content:center" onclick="resetDemo()"><i class="ti ti-refresh"></i> Reset demo answers</button>
+    <input type="file" id="restore-input" accept=".json,application/json" style="display:none" onchange="restoreBackup(this)">
+  </div>`;
+}
+function getAddSubjForm(){
+  const dots=COLS.map((c,i)=>`<div class="cdot ${c===qfC?'sel':''}" style="background:${c}" onclick="qfc(${i})"></div>`).join('');
+  const icons=ICONS.map(ic=>`<button class="tree-btn" style="${ic===qfI?'background:var(--bd2)':''}" onclick="qfi('${ic}')" title="${ic}"><i class="ti ti-${ic}"></i></button>`).join('');
+  return `<div class="qf"><span class="ql">Subject name</span><input id="qf-sn" placeholder="e.g. Mathematics…" onkeydown="if(event.key==='Enter')saveSubj()"><span class="ql">Colour</span><div class="cdots">${dots}</div><span class="ql">Icon</span><div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px">${icons}</div><div class="qf-row"><button class="btn btn-s btn-sm" style="flex:1" onclick="st.addS=false;renderSB()">Cancel</button><button class="btn btn-p btn-sm" style="flex:1" onclick="saveSubj()">Create</button></div></div>`;
+}
+function getAddChapForm(sid){
+  return `<div class="qf"><span class="ql">Workbook name</span><input id="qf-cn" placeholder="e.g. Chapter 1…" onkeydown="if(event.key==='Enter')saveChap('${sid}')"><span class="ql">Unit or topic</span><input id="qf-cu" placeholder="e.g. Of Mice and Men…" onkeydown="if(event.key==='Enter')saveChap('${sid}')"><div class="qf-row"><button class="btn btn-s btn-sm" style="flex:1" onclick="st.addC=null;renderSB()">Cancel</button><button class="btn btn-p btn-sm" style="flex:1" onclick="saveChap('${sid}')">Create</button></div></div>`;
+}
+function getAddPageForm(sid,cid){
+  const chips=PTYPES.map(t=>`<button class="type-chip ${t===qfT?'sel':''}" onclick="qft('${t}')">${PTYPE_META[t]?.label||tl(t)}</button>`).join('');
+  return `<div class="qf"><span class="ql">Page title</span><input id="qf-pt" placeholder="e.g. Characterisation…" onkeydown="if(event.key==='Enter')savePage('${sid}','${cid}')"><span class="ql">Section (optional)</span><input id="qf-ps" placeholder="e.g. Group Class 1…" onkeydown="if(event.key==='Enter')savePage('${sid}','${cid}')"><span class="ql">Type</span><div class="type-chips" id="qf-chips">${chips}</div><div class="qf-row"><button class="btn btn-s btn-sm" style="flex:1" onclick="st.addP=null;renderSB()">Cancel</button><button class="btn btn-p btn-sm" style="flex:1" onclick="savePage('${sid}','${cid}')">Add page</button></div></div>`;
+}
+function toggleS(id){st.exS[id]=!st.exS[id];renderSB();}
+function toggleC(id){st.exC[id]=!st.exC[id];renderSB();}
+function startAddSubj(){st.addS=true;renderSB();setTimeout(()=>document.getElementById('qf-sn')?.focus(),50);}
+function startAddChap(sid){st.addC=sid;st.exS[sid]=true;renderSB();setTimeout(()=>document.getElementById('qf-cn')?.focus(),50);}
+function startAddPage(sid,cid){st.addP=cid;st.exS[sid]=true;st.exC[cid]=true;renderSB();setTimeout(()=>document.getElementById('qf-pt')?.focus(),50);}
+function qfc(i){qfC=COLS[i];qfBg=BGS[i];renderSB();}
+function qfi(ic){qfI=ic;renderSB();}
+function qft(t){qfT=t;renderSB();}
+function selPage(sid,cid,pid){st.sid=sid;st.cid=cid;st.pid=pid;st.editB=null;st.showPick=false;renderSB();renderMain();}
+function setMode(m){st.mode=m;render();}
+
+function startRenameS(id){st.renameS=id;st.renameC=null;renderSB();setTimeout(()=>{const el=document.getElementById('rs-'+id);if(el){el.focus();el.select();}},50);}
+function startRenameC(id){st.renameC=id;st.renameS=null;renderSB();setTimeout(()=>{const el=document.getElementById('rc-name-'+id);if(el){el.focus();el.select();}},50);}
+function saveRenameS(id){
+  const s=gS(id);if(!s)return;
+  const name=(document.getElementById('rs-'+id)?.value||'').trim();
+  if(name)s.name=name;
+  st.renameS=null;save();renderSB();
+}
+function saveRenameC(id){
+  const s=gS(st.sid);if(!s)return;
+  const c=s.chapters?.find(c=>c.id===id);if(!c)return;
+  const name=(document.getElementById('rc-name-'+id)?.value||'').trim();
+  const unit=(document.getElementById('rc-unit-'+id)?.value||'').trim();
+  if(name)c.name=name;
+  c.unit=unit;
+  st.renameC=null;save();renderSB();
+}
+
+//EXPORT / RESTORE
+function exportBackup(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`aia-workbooks-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(a.href);
+}
+function triggerRestore(){document.getElementById('restore-input').click();}
+function restoreBackup(input){
+  const file=input.files?.[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const parsed=JSON.parse(e.target.result);
+      if(!parsed.subjects)throw new Error('Invalid backup file');
+      if(!confirm(`Restore backup? This will replace all current workbooks.\n\n${parsed.subjects.length} subject(s) found in backup.`)){input.value='';return;}
+      db=parsed;
+      st.sid=db.subjects[0]?.id||null;
+      st.cid=null;st.pid=null;
+      if(st.sid){st.exS[st.sid]=true;const c=db.subjects[0].chapters?.[0];if(c){st.cid=c.id;st.exC[c.id]=true;}}
+      save();render();
+    }catch(err){alert('Could not restore — file may be corrupted or not a valid backup.');}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+function resetDemo(){
+  if(!confirm('Clear ALL student answers, progress, and watched status?\n\nWorkbook content (pages, blocks) will be kept — only student responses are cleared.\nThis cannot be undone.'))return;
+  db.answers={};db.progress={};db.watched={};
+  save();render();
+}
+function saveSubj(){
+  const name=(document.getElementById('qf-sn')?.value||'').trim();if(!name)return;
+  const s={id:uid(),name,color:qfC,bg:qfBg,icon:qfI,chapters:[]};
+  db.subjects.push(s);st.sid=s.id;st.exS[s.id]=true;st.addS=false;st.addC=s.id;
+  qfC=COLS[0];qfBg=BGS[0];qfI='book';save();renderSB();renderMain();
+  setTimeout(()=>document.getElementById('qf-cn')?.focus(),50);
+}
+function saveChap(sid){
+  const name=(document.getElementById('qf-cn')?.value||'').trim();const unit=(document.getElementById('qf-cu')?.value||'').trim();if(!name)return;
+  const s=gS(sid);if(!s.chapters)s.chapters=[];
+  const c={id:uid(),name,unit,pages:[]};s.chapters.push(c);
+  st.cid=c.id;st.exC[c.id]=true;st.addC=null;st.addP=c.id;
+  save();renderSB();renderMain();setTimeout(()=>document.getElementById('qf-pt')?.focus(),50);
+}
+function savePage(sid,cid){
+  const title=(document.getElementById('qf-pt')?.value||'').trim();const section=(document.getElementById('qf-ps')?.value||'').trim();if(!title)return;
+  const c=gC(sid,cid);if(!c.pages)c.pages=[];
+  const p={id:uid(),title,section,type:qfT,blocks:[]};c.pages.push(p);
+  st.pid=p.id;st.sid=sid;st.cid=cid;st.addP=null;qfT='ignite';
+  save();renderSB();renderMain();
+}
+
+//PAGE EDITOR 
+function getEditor(p,s){
+  const blocks=(p.blocks||[]).map((b,i)=>getBWrap(b,p,i)).join('');
+  const picker=st.showPick&&!st.pickAfter?getPicker():'';
+  const m=PTYPE_META[p.type]||PTYPE_META.resource;
+  const isWork=['ignite','explore','apply','reflect'].includes(p.type);
+  const tabStyle=(on)=>on
+    ?'padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;background:var(--navy);color:#fff;border:none'
+    :'padding:5px 11px;font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--t2);border:none';
+  const tabs=isWork?`<div style="display:flex;border:1px solid var(--bd2);border-radius:var(--r8);overflow:hidden;flex-shrink:0">
+    <button style="${tabStyle(!st.showAnswers)}" onclick="st.showAnswers=false;renderMain()"><i class="ti ti-pencil" style="margin-right:4px;font-size:11px"></i>Edit</button>
+    <button style="${tabStyle(st.showAnswers)}" onclick="st.showAnswers=true;renderMain()"><i class="ti ti-eye" style="margin-right:4px;font-size:11px"></i>Answers</button>
+  </div>`:'';
+  return `<div class="page-hdr-bar">
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+        <input class="page-sec-i" value="${esc(p.section||'')}" placeholder="Group Class / Section…" onchange="updPF('section',this.value)">
+        <span class="badge badge-${p.type}"><i class="ti ${m.icon}" style="font-size:11px"></i> ${m.label}</span>
+        <button class="btn btn-g" style="font-size:11px;padding:2px 7px" onclick="cycleType()">Change type</button>
+      </div>
+      <input class="page-title-i" value="${esc(p.title)}" placeholder="Page title…" onchange="updPF('title',this.value)">
+    </div>
+    <div style="display:flex;gap:7px;align-items:center">
+      ${tabs}
+      <button class="btn btn-s btn-sm" onclick="st.mode='student';st.showAnswers=false;renderMain()"><i class="ti ti-eye"></i> Student view</button>
+    </div>
+  </div>
+  ${st.showAnswers&&isWork ? getAnswersPanel(p) : `<div class="page-scroll" id="pscroll">
+    ${blocks}${picker}
+    <div class="add-bar"><button class="add-btn" onclick="togglePick(null)"><i class="ti ti-plus"></i> Add block</button></div>
+  </div>`}`;
+}
+function getAnswersPanel(p){
+  const prog=db.progress[p.id]||'none';
+  const progCol=prog==='done'?'var(--done)':prog==='in_progress'?'var(--prog)':'var(--t3)';
+  const progLabel=prog==='done'?'✅ Complete':prog==='in_progress'?'🟡 In progress':'⬜ Not started';
+  const answerableBlocks=(p.blocks||[]).filter(b=>['question','petal'].includes(b.type));
+  if(!answerableBlocks.length) return `<div class="page-scroll"><div style="text-align:center;padding:48px 20px;color:var(--t3)"><i class="ti ti-message-off" style="font-size:28px;display:block;margin-bottom:8px;opacity:.4"></i>This page has no question or PETAL blocks.</div></div>`;
+  const items=answerableBlocks.map(b=>{
+    if(b.type==='question'){
+      const key=`${p.id}-${b.id}`;const ans=db.answers[key];
+      return `<div style="border:1px solid var(--bd);border-radius:var(--r8);overflow:hidden;margin-bottom:12px">
+        <div style="padding:8px 13px;background:var(--bg);border-bottom:1px solid var(--bd);font-size:12px;color:var(--t2);line-height:1.5">
+          ${b.qn?`<span style="font-weight:700;color:var(--t3);margin-right:6px">Q${b.qn}</span>`:''}${esc(b.q||'')}
+        </div>
+        <div style="padding:11px 13px;font-size:13px;line-height:1.65;min-height:44px;${ans?'color:var(--t1)':'color:var(--t3);font-style:italic'}">
+          ${ans?esc(ans).replace(/\n/g,'<br>'):'No answer yet'}
+        </div>
+      </div>`;
+    }
+    if(b.type==='petal'){
+      const rows=PETROWS.map((r,i)=>{const key=`${p.id}-petal-${r.k}`;const ans=db.answers[key];return `<div style="display:grid;grid-template-columns:52px 1fr;border-bottom:${i<PETROWS.length-1?'1px solid var(--bd)':'none'}">
+        <div style="background:${r.bg};padding:8px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px">
+          <span style="font-size:13px;font-weight:700;color:${r.c}">${r.k}</span>
+          <span style="font-size:9px;font-weight:600;color:${r.c}">${r.l}</span>
+        </div>
+        <div style="padding:9px 12px;font-size:13px;line-height:1.6;${ans?'color:var(--t1)':'color:var(--t3);font-style:italic'}">
+          ${ans?esc(ans).replace(/\n/g,'<br>'):'Not filled in'}
+        </div>
+      </div>`;}).join('');
+      return `<div style="border:1px solid var(--bd);border-radius:var(--r8);overflow:hidden;margin-bottom:12px"><div style="padding:7px 12px;background:var(--bg);border-bottom:1px solid var(--bd);font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">PETAL paragraph</div>${rows}</div>`;
+    }
+    return '';
+  }).join('');
+  const totalQ=answerableBlocks.length;
+  const answered=answerableBlocks.filter(b=>{
+    if(b.type==='question') return !!db.answers[`${p.id}-${b.id}`];
+    if(b.type==='petal') return PETROWS.some(r=>!!db.answers[`${p.id}-petal-${r.k}`]);
+    return false;
+  }).length;
+  return `<div class="page-scroll">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:10px 14px;background:var(--bg);border-radius:var(--r8);border:1px solid var(--bd)">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:2px">Student responses — ${esc(p.title)}</div>
+        <div style="font-size:11px;color:var(--t3)">${answered} of ${totalQ} question${totalQ!==1?'s':''} answered</div>
+      </div>
+      <span style="font-size:12px;font-weight:600;color:${progCol}">${progLabel}</span>
+    </div>
+    ${items}
+    <div style="padding:12px 0;border-top:1px solid var(--bd);display:flex;justify-content:flex-end">
+      <button class="btn btn-s btn-sm" onclick="resetPage('${p.id}')"><i class="ti ti-refresh"></i> Clear this page's answers</button>
+    </div>
+  </div>`;
+}
+function resetPage(pid){
+  if(!confirm('Clear all answers and progress for this page?'))return;
+  delete db.progress[pid];
+  Object.keys(db.answers).forEach(k=>{if(k.startsWith(pid+'-'))delete db.answers[k];});
+  save();renderMain();
+}
+function getBWrap(b,p,i){
+  const ed=st.editB===b.id;
+  const pa=st.showPick&&st.pickAfter===b.id;
+  const up=i>0?`<button class="bhb" onclick="mvBlock('${b.id}',-1)"><i class="ti ti-arrow-up" style="font-size:11px"></i></button>`:'';
+  const dn=i<(p.blocks.length-1)?`<button class="bhb" onclick="mvBlock('${b.id}',1)"><i class="ti ti-arrow-down" style="font-size:11px"></i></button>`:'';
+  const hb=ed?'':
+    `<div class="bhbar"><button class="bhb" onclick="stEdit('${b.id}')"><i class="ti ti-pencil" style="font-size:11px"></i> Edit</button>${up}${dn}<button class="bhb del" onclick="delBlock('${b.id}')"><i class="ti ti-trash" style="font-size:11px"></i></button></div>`;
+  const content=ed?getIForm(b):renderBView(b,p.id,gS(st.sid)?.color||'#1a2744');
+  return `<div class="bwrap ${ed?'editing':''}" id="bw-${b.id}">${hb}${content}</div>${pa?getPicker():''}`;
+}
+function togglePick(after){st.showPick=!(st.showPick&&st.pickAfter===after);st.pickAfter=after;renderMain();}
+function getPicker(){
+  return `<div class="bpicker"><span class="bpicker-lbl">Choose block type</span><div class="bpicker-grid">${BDEFS.map(d=>`<button class="bpb" onclick="addBlock('${d.t}')"><i class="ti ${d.i}" style="font-size:13px"></i> ${d.l}</button>`).join('')}</div></div>`;
+}
+function stEdit(bid){st.editB=bid;st.showPick=false;renderMain();setTimeout(()=>{const f=document.querySelector(`#bw-${bid} .ita,#bw-${bid} .ii`);if(f)f.focus();},40);}
+function cancelEdit(){st.editB=null;renderMain();}
+function updPF(f,v){const p=gP(st.sid,st.cid,st.pid);if(p){p[f]=v;save();renderSB();}}
+function cycleType(){const p=gP(st.sid,st.cid,st.pid);if(!p)return;const i=PTYPES.indexOf(p.type);p.type=PTYPES[(i+1)%PTYPES.length];save();renderMain();}
+function addBlock(type){
+  const p=gP(st.sid,st.cid,st.pid);if(!p)return;if(!p.blocks)p.blocks=[];
+  const m=PTYPE_META[p.type]||PTYPE_META.resource;
+  const def={taskbox:{pageType:p.type,name:''},body:{text:''},question:{q:'',qn:(p.blocks.filter(b=>b.type==='question').length+1),marks:0,rows:3},vocab:{terms:''},extract:{text:''},concept:{title:'',text:'',bg:CTHEMES[0].bg,color:CTHEMES[0].c,bd:CTHEMES[0].bd},petal:{},youtube:{title:'',url:'',channel:''},links:{items:[{label:'',url:''}]},diagram:{label:''},infolist:{title:'',items:[],bg:CTHEMES[0].bg,color:CTHEMES[0].c,bd:CTHEMES[0].bd}};
+  const nb={id:uid(),type,...(def[type]||{})};
+  if(st.pickAfter){const idx=p.blocks.findIndex(b=>b.id===st.pickAfter);if(idx>=0){p.blocks.splice(idx+1,0,nb);}else p.blocks.push(nb);}
+  else p.blocks.push(nb);
+  st.showPick=false;st.editB=nb.id;save();renderMain();
+  setTimeout(()=>{const f=document.querySelector(`#bw-${nb.id} .ita,#bw-${nb.id} .ii`);if(f)f.focus();},50);
+}
+function delBlock(bid){const p=gP(st.sid,st.cid,st.pid);if(!p)return;p.blocks=p.blocks.filter(b=>b.id!==bid);if(st.editB===bid)st.editB=null;save();renderMain();}
+function mvBlock(bid,d){const p=gP(st.sid,st.cid,st.pid);const i=p.blocks.findIndex(b=>b.id===bid);const n=i+d;if(n<0||n>=p.blocks.length)return;[p.blocks[i],p.blocks[n]]=[p.blocks[n],p.blocks[i]];save();renderMain();}
+
+// ── INLINE EDIT FORMS ──────────────────────────
+function ctPick(btn,bg,c,bd){document.querySelectorAll('#ct-btns .ctb').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');document.getElementById('ef-bg').value=bg;document.getElementById('ef-c').value=c;document.getElementById('ef-bd').value=bd;}
+function addLR(){const r=document.getElementById('lr');const i=r.children.length;const d=document.createElement('div');d.className='linkrow';d.id='lri-'+i;d.innerHTML=`<input class="ii lfl" placeholder="Label" style="margin:0"><input class="ii lfu" placeholder="URL" style="margin:0"><button class="btn btn-g btn-sm" onclick="rmLR(${i})" style="padding:4px 7px"><i class="ti ti-x" style="font-size:12px"></i></button>`;r.appendChild(d);}
+function rmLR(i){document.getElementById('lri-'+i)?.remove();}
+
+function getIForm(b){
+  const acts=`<div class="iacts"><button class="btn btn-s btn-sm" onclick="cancelEdit()">Cancel</button><button class="btn btn-p btn-sm" onclick="saveEdit('${b.id}')"><i class="ti ti-check"></i> Done</button></div>`;
+  if(b.type==='taskbox'){
+    const p=gP(st.sid,st.cid,st.pid);
+    const typeOpts=PTYPES.map(t=>`<button class="type-chip ${(b.pageType||p?.type)===t?'sel':''}" onclick="this.parentElement.querySelectorAll('.type-chip').forEach(x=>x.classList.remove('sel'));this.classList.add('sel');document.getElementById('ef-tbtype').value='${t}'">${PTYPE_META[t]?.label||tl(t)}</button>`).join('');
+    return `<div class="iform"><span class="il">Activity name (bold heading)</span><input class="ii" id="ef-tbname" value="${esc(b.name||'')}"><span class="il">Page type (sets icon + colour)</span><div class="type-chips" style="margin-bottom:8px">${typeOpts}</div><input type="hidden" id="ef-tbtype" value="${esc(b.pageType||p?.type||'explore')}">${acts}</div>`;
+  }
+  if(b.type==='body')return `<div class="iform"><span class="il">Text</span><textarea class="ita" id="ef-text" style="min-height:90px">${esc(b.text||'')}</textarea>${acts}</div>`;
+  if(b.type==='question')return `<div class="iform"><span class="il">Question</span><textarea class="ita" id="ef-q">${esc(b.q||'')}</textarea><div class="igrid2"><div><span class="il">Q number</span><input class="inum" id="ef-qn" type="number" min="1" value="${b.qn||1}"></div><div><span class="il">Marks (0=none)</span><input class="inum" id="ef-marks" type="number" min="0" value="${b.marks||0}"></div></div><span class="il">Answer rows</span><input class="inum" id="ef-rows" type="number" min="1" max="12" value="${b.rows||3}" style="width:80px">${acts}</div>`;
+  if(b.type==='vocab')return `<div class="iform"><span class="il">Vocabulary terms (comma-separated)</span><textarea class="ita" id="ef-vocab" placeholder="exposition, rising action, climax…">${esc(b.terms||'')}</textarea>${acts}</div>`;
+  if(b.type==='extract')return `<div class="iform"><span class="il">Text extract</span><textarea class="ita" id="ef-ext" style="min-height:120px">${esc(b.text||'')}</textarea>${acts}</div>`;
+  if(b.type==='concept'||b.type==='infolist'){
+    const thbtns=CTHEMES.map(t=>`<button class="ctb ${b.bg===t.bg?'sel':''}" style="background:${t.bg};color:${t.c};border-color:${t.bd}" onclick="ctPick(this,'${t.bg}','${t.c}','${t.bd}')">${t.n}</button>`).join('');
+    return `<div class="iform"><span class="il">${b.type==='concept'?'Title':'Box title'}</span><input class="ii" id="ef-ti" value="${esc(b.title||'')}"><span class="il">${b.type==='concept'?'Body text':'Items (one per line)'}</span>${b.type==='concept'?`<textarea class="ita" id="ef-tx">${esc(b.text||'')}</textarea>`:`<textarea class="ita" id="ef-tx" placeholder="Item 1&#10;Item 2…">${esc((b.items||[]).join('\n'))}</textarea>`}<span class="il">Colour</span><div class="ct-btns" id="ct-btns">${thbtns}</div><input type="hidden" id="ef-bg" value="${b.bg||CTHEMES[0].bg}"><input type="hidden" id="ef-c" value="${b.color||CTHEMES[0].c}"><input type="hidden" id="ef-bd" value="${b.bd||CTHEMES[0].bd}">${acts}</div>`;
+  }
+  if(b.type==='petal')return `<div class="iform"><div style="padding:10px;background:var(--card);border-radius:var(--r8);font-size:13px;color:var(--t2);margin-bottom:8px"><i class="ti ti-info-circle" style="margin-right:5px"></i>PETAL (Point → Evidence → Technique → Analysis → Link) — students fill in each row.</div>${acts}</div>`;
+  if(b.type==='youtube')return `<div class="iform"><span class="il">Video title</span><input class="ii" id="ef-yt" value="${esc(b.title||'')}"><span class="il">YouTube URL</span><input class="ii" id="ef-yu" value="${esc(b.url||'')}"><span class="il">Channel / duration</span><input class="ii" id="ef-yc" value="${esc(b.channel||'')}">${acts}</div>`;
+  if(b.type==='links'){
+    const rows=(b.items||[{label:'',url:''}]).map((l,i)=>`<div class="linkrow" id="lri-${i}"><input class="ii lfl" placeholder="Label" value="${esc(l.label||'')}" style="margin:0"><input class="ii lfu" placeholder="URL" value="${esc(l.url||'')}" style="margin:0"><button class="btn btn-g btn-sm" onclick="rmLR(${i})" style="padding:4px 7px"><i class="ti ti-x" style="font-size:12px"></i></button></div>`).join('');
+    return `<div class="iform"><span class="il">Links</span><div id="lr">${rows}</div><button class="btn btn-s btn-sm" style="margin-bottom:8px" onclick="addLR()"><i class="ti ti-plus"></i> Add link</button>${acts}</div>`;
+  }
+  if(b.type==='diagram') return `<div class="iform">
+    <span class="il">Upload image</span>
+    <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:16px;border:2px dashed var(--bd2);border-radius:var(--r8);cursor:pointer;background:var(--card);margin-bottom:8px" onclick="document.getElementById('ef-img-input').click()">
+      <i class="ti ti-upload" style="font-size:22px;color:var(--t3)"></i>
+      <span style="font-size:12px;color:var(--t2);font-weight:500">Click to upload image</span>
+      <span style="font-size:11px;color:var(--t3)">JPG, PNG, GIF, WebP — auto-compressed</span>
+    </label>
+    <input type="file" id="ef-img-input" accept="image/*" style="display:none" onchange="prevImg(this)">
+    <div id="img-prev-wrap" style="${b.imageData?'':'display:none'}">
+      <img id="img-prev" src="${b.imageData||''}" style="width:100%;border-radius:var(--r8);margin-bottom:8px;max-height:200px;object-fit:contain;background:var(--bg)">
+      <button class="btn btn-s btn-sm" style="width:100%;margin-bottom:8px;color:var(--red)" onclick="clearImg()"><i class="ti ti-trash"></i> Remove image</button>
+    </div>
+    <input type="hidden" id="ef-imgdata" value="${b.imageData||''}">
+    <span class="il">Caption (optional)</span>
+    <input class="ii" id="ef-dl" value="${esc(b.label||'')}">
+    ${acts}</div>`;
+  return `<div class="iform"><div style="color:var(--t3)">No editor for "${b.type}"</div>${acts}</div>`;
+}
+
+function saveEdit(bid){
+  const p=gP(st.sid,st.cid,st.pid);const b=p?.blocks?.find(b=>b.id===bid);if(!b)return;
+  if(b.type==='taskbox'){b.name=document.getElementById('ef-tbname')?.value||'';b.pageType=document.getElementById('ef-tbtype')?.value||b.pageType;}
+  else if(b.type==='body')b.text=document.getElementById('ef-text')?.value||'';
+  else if(b.type==='question'){b.q=document.getElementById('ef-q')?.value||'';b.qn=+document.getElementById('ef-qn')?.value||b.qn;b.marks=+document.getElementById('ef-marks')?.value||0;b.rows=+document.getElementById('ef-rows')?.value||3;}
+  else if(b.type==='vocab')b.terms=document.getElementById('ef-vocab')?.value||'';
+  else if(b.type==='extract')b.text=document.getElementById('ef-ext')?.value||'';
+  else if(b.type==='concept'||b.type==='infolist'){b.title=document.getElementById('ef-ti')?.value||'';const tx=document.getElementById('ef-tx')?.value||'';if(b.type==='concept')b.text=tx;else b.items=tx.split('\n').filter(s=>s.trim());b.bg=document.getElementById('ef-bg')?.value||b.bg;b.color=document.getElementById('ef-c')?.value||b.color;b.bd=document.getElementById('ef-bd')?.value||b.bd;}
+  else if(b.type==='youtube'){b.title=document.getElementById('ef-yt')?.value||'';b.url=document.getElementById('ef-yu')?.value||'';b.channel=document.getElementById('ef-yc')?.value||'';}
+  else if(b.type==='links'){const ls=[...document.querySelectorAll('.lfl')].map(i=>i.value);const us=[...document.querySelectorAll('.lfu')].map(i=>i.value);b.items=ls.map((l,i)=>({label:l,url:us[i]||''})).filter(l=>l.label||l.url);}
+  else if(b.type==='diagram'){b.label=document.getElementById('ef-dl')?.value||'';const imgd=document.getElementById('ef-imgdata')?.value;if(imgd)b.imageData=imgd;else if(imgd==='')b.imageData=null;}
+  st.editB=null;save();renderMain();
+}
+
+//BLOCK RENDERER
+function renderBView(b,pid,col){
+  if(b.type==='taskbox'){
+    const pt=b.pageType||'explore';
+    const m=PTYPE_META[pt]||PTYPE_META.explore;
+    return `<div class="aia-task-box">
+      <div class="aia-task-hdr">
+        <div class="aia-task-icon"><i class="ti ${m.icon}" style="font-size:28px;color:${m.col}"></i></div>
+        <div class="aia-task-body">
+          <div class="aia-task-type">Task/Activity</div>
+          <div class="aia-task-desc">${esc(m.desc)}</div>
+          <div class="aia-task-name" style="color:${m.col}">${esc(b.name||'')}</div>
+          <div class="aia-task-badge" style="color:${m.col};border-color:${m.bd};background:${m.bg}">
+            <i class="ti ${m.icon}" style="font-size:11px"></i>${m.label}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+  if(b.type==='body')return `<p class="sb-body">${esc(b.text||'').replace(/\n/g,'<br>')}</p>`;
+  if(b.type==='question'){
+    const key=`${pid}-${b.id}`;const marks=b.marks>0?`<span style="font-size:11px;color:var(--t3)">${b.marks}m</span>`:'';
+    return `<div class="sb-q"><div class="sb-qhdr"><div style="display:flex;gap:7px;flex:1"><span style="font-size:10px;font-weight:700;color:var(--t3);flex-shrink:0;margin-top:2px">${b.qn?'Q'+b.qn:''}</span><span style="font-size:13px;color:var(--t1);line-height:1.5">${esc(b.q||'')}</span></div>${marks}</div><textarea class="sb-qta" style="min-height:${(b.rows||3)*28}px" placeholder="Write your answer here…" oninput="svAns('${key}',this.value)">${esc(db.answers[key]||'')}</textarea></div>`;
+  }
+  if(b.type==='vocab'){
+    const terms=(b.terms||'').split(',').map(t=>t.trim()).filter(Boolean);
+    return `<div class="sb-vocab"><div class="sb-vocab-title">Vocabulary</div><div class="sb-vocab-terms">${terms.map(t=>`<span class="sb-vocab-term">${esc(t)}</span>`).join('')}</div></div>`;
+  }
+  if(b.type==='extract')return `<div class="sb-extract" style="border-left-color:${col}">${esc(b.text||'').replace(/\n/g,'<br>')}</div>`;
+  if(b.type==='concept')return `<div class="sb-concept" style="background:${b.bg||'#dbeafe'};border-color:${b.bd||'#bfdbfe'}"><div class="sb-ctitle" style="color:${b.color||'#1d4ed8'}">${esc(b.title||'')}</div><div style="font-size:13px;color:${b.color||'var(--t1)'};line-height:1.6">${esc(b.text||'').replace(/\n/g,'<br>')}</div></div>`;
+  if(b.type==='petal')return `<div class="sb-petal">${PETROWS.map((r,i)=>{const key=`${pid}-petal-${r.k}`;return `<div class="prow" style="border-bottom:${i<PETROWS.length-1?'1px solid var(--bd)':'none'}"><div class="plbl" style="background:${r.bg}"><span style="font-size:14px;font-weight:700;color:${r.c}">${r.k}</span><span style="font-size:9px;font-weight:600;color:${r.c}">${r.l}</span></div><textarea class="pta" placeholder="${r.l}…" oninput="svAns('${key}',this.value)">${esc(db.answers[key]||'')}</textarea></div>`;}).join('')}</div>`;
+  if(b.type==='youtube')return `<div class="sb-yt"><div class="sb-ythumb" onclick="${b.url?`window.open('${esc(b.url)}','_blank')`:'void(0)'}"><i class="ti ti-player-play-filled" style="font-size:26px;color:#b91c1c"></i><div><div style="font-size:13px;font-weight:600">${esc(b.title||'Video')}</div><div style="font-size:11px;color:var(--t3)">${esc(b.channel||'')}</div></div></div><div class="sb-ytinfo">${b.url?`<a href="${esc(b.url)}" target="_blank" class="btn btn-s btn-sm"><i class="ti ti-external-link"></i> Watch on YouTube</a>`:'<span style="font-size:12px;color:var(--t3)">No URL set</span>'}<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" ${db.watched?.[`${pid}-${b.id}`]?'checked':''} onchange="db.watched=db.watched||{};db.watched['${pid}-${b.id}']=this.checked;save()"> Watched</label></div></div>`;
+  if(b.type==='links')return `<div class="sb-links">${(b.items||[]).map(l=>`<div class="sb-link" onclick="${l.url?`window.open('${esc(l.url)}','_blank')`:'void(0)'}"><i class="ti ti-external-link" style="font-size:13px;color:var(--t3)"></i><div><div style="font-size:13px;font-weight:500">${esc(l.label||'Link')}</div></div><i class="ti ti-arrow-up-right" style="font-size:12px;color:var(--t3);margin-left:auto"></i></div>`).join('')||'<div style="font-size:12px;color:var(--t3)">No links — click Edit to add.</div>'}</div>`;
+  if(b.type==='diagram'){
+    if(b.imageData) return `<div class="sb-block-img"><img src="${b.imageData}" alt="${esc(b.label||'')}" style="width:100%;border-radius:var(--r8);display:block;max-height:400px;object-fit:contain;background:var(--bg)">${b.label?`<div style="font-size:11px;color:var(--t3);text-align:center;margin-top:5px;font-style:italic">${esc(b.label)}</div>`:''}</div>`;
+    return `<div class="sb-diag"><i class="ti ti-photo" style="font-size:22px;color:var(--t3)"></i><span style="font-size:12px;color:var(--t3)">${esc(b.label||'Image placeholder — click Edit to upload')}</span></div>`;
+  }
+  if(b.type==='infolist')return `<div class="sb-il" style="background:${b.bg||'#dbeafe'};border-color:${b.bd||'#bfdbfe'}">${b.title?`<div class="sb-iltitle" style="color:${b.color||'#1d4ed8'}">${esc(b.title)}</div>`:''}<div>${(b.items||[]).map(item=>`<div style="display:flex;gap:7px;font-size:13px;color:${b.color||'var(--t1)'};margin-bottom:3px;line-height:1.4"><i class="ti ti-point-filled" style="font-size:10px;margin-top:4px;flex-shrink:0;color:${b.color||'var(--t3)'}"></i>${esc(item)}</div>`).join('')}</div></div>`;
+  return '';
+}
+
+//STUDENT VIEW
+function getStudentView(){
+  if(!db.subjects.length)return `<div class="main-empty"><i class="ti ti-book"></i><p>No workbooks yet. Switch to Teacher mode to create some.</p></div>`;
+  // Subject list (when no subject selected, or only one subject auto-select it)
+  if(!st.sid){
+    if(db.subjects.length===1){st.sid=db.subjects[0].id;}
+    else{
+      const cards=db.subjects.map(s=>{
+        const chaps=s.chapters||[];const totalWp=chaps.reduce((a,c)=>a+wPages(c.pages).length,0);const doneWp=chaps.reduce((a,c)=>a+wPages(c.pages).filter(p=>db.progress[p.id]==='done').length,0);const pct=totalWp?Math.round(doneWp/totalWp*100):0;
+        return `<div style="border:1px solid var(--bd);border-radius:var(--r12);overflow:hidden;cursor:pointer;background:var(--card);margin-bottom:10px;box-shadow:var(--sh)" onclick="st.sid='${s.id}';renderMain()">
+          <div style="height:4px;background:${s.color||'var(--red)'}"></div>
+          <div style="padding:14px;display:flex;align-items:center;gap:12px">
+            <div style="width:36px;height:36px;border-radius:var(--r8);background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-${s.icon||'book'}" style="color:${s.color};font-size:17px"></i></div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:2px">${esc(s.name)}</div>
+            <div style="font-size:11px;color:var(--t3)">${chaps.length} workbook${chaps.length!==1?'s':''} · ${doneWp}/${totalWp} pages done</div>
+            <div class="prog-track" style="margin-top:6px"><div class="prog-fill" style="width:${pct}%;background:${s.color}"></div></div></div>
+          </div>
+        </div>`;
+      }).join('');
+      return `<div style="padding:24px;overflow-y:auto;flex:1"><div style="height:4px;background:var(--red);margin:-24px -24px 20px"></div><div style="font-family:'Lora',serif;font-size:20px;font-weight:600;margin-bottom:16px">My Workbooks</div>${cards}</div>`;
+    }
+  }
+  const s=gS(st.sid);
+  if(!st.cid){
+    const cards=(s?.chapters||[]).map(c=>{
+      const wp=wPages(c.pages);const done=wp.filter(p=>db.progress[p.id]==='done').length;const pct=wp.length?Math.round(done/wp.length*100):0;
+      return `<div style="border:1px solid var(--bd);border-radius:var(--r12);overflow:hidden;cursor:pointer;background:var(--card);margin-bottom:10px;box-shadow:var(--sh)" onclick="st.cid='${c.id}';st.pid=(gC(st.sid,'${c.id}')?.pages[0]?.id||null);renderMain()">
+        <div style="height:4px;background:var(--red)"></div>
+        <div style="padding:14px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:2px">${esc(c.name)}</div>
+          <div style="font-size:12px;color:var(--t2);margin-bottom:8px">${esc(c.unit)}</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--t3)">${done}/${wp.length} pages done</span><span style="font-size:11px;font-weight:700;color:${s?.color||'var(--navy)'}">${pct}%</span></div>
+          <div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${s?.color||'var(--navy)'}"></div></div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div style="padding:24px;overflow-y:auto;flex:1;display:flex;flex-direction:column">
+      <div style="height:4px;background:var(--red);margin:-24px -24px 20px;border-radius:0"></div>
+      <button style="display:inline-flex;align-items:center;gap:5px;background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--t3);margin-bottom:14px;padding:0" onclick="st.sid=null;st.cid=null;renderMain()"><i class="ti ti-arrow-left" style="font-size:13px"></i> All subjects</button>
+      <div style="font-family:'Lora',serif;font-size:20px;font-weight:600;margin-bottom:4px">${esc(s?.name||'')}</div>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:16px">Choose a workbook to open.</div>${cards}</div>`;
+  }
+  const c=gC(st.sid,st.cid);if(!c)return '';
+  const pages=c.pages||[];
+  let ci=pages.findIndex(p=>p.id===st.pid);if(ci<0&&pages.length){st.pid=pages[0].id;ci=0;}
+  const cur=pages[ci];if(!cur)return `<div class="main-empty"><p>No pages yet.</p></div>`;
+  const secs=[...new Set(pages.map(p=>p.section||''))];
+  const sbItems=secs.map(sec=>`<div class="wb-sec">${sec||'Pages'}</div>${pages.filter(p=>(p.section||'')===sec).map(p=>{
+    const m=PTYPE_META[p.type]||PTYPE_META.resource;const isWork=['ignite','explore','apply','reflect'].includes(p.type);
+    return `<button class="wb-prow ${p.id===st.pid?'active':''}" style="--subj-color:${s?.color||'var(--navy)'}" onclick="st.pid='${p.id}';renderMain()">
+      <span class="wdot" style="background:${isWork?dCol(p.id,s?.color):'var(--bd)'}"></span>
+      <div><span style="font-size:11px;display:block;line-height:1.3;color:${p.id===st.pid?'var(--t1)':'var(--t2)'};font-weight:${p.id===st.pid?600:400}">${esc(p.title)}</span>
+      <span class="badge badge-${p.type}" style="font-size:9px;padding:1px 5px"><i class="ti ${m.icon}" style="font-size:9px"></i> ${m.label}</span></div>
+    </button>`;
+  }).join('')}`).join('');
+  const wp=wPages(pages);const done=wp.filter(p=>db.progress[p.id]==='done').length;const pct=wp.length?Math.round(done/wp.length*100):0;
+  const isWork=['ignite','explore','apply','reflect'].includes(cur.type);
+  const m=PTYPE_META[cur.type]||PTYPE_META.resource;
+  const aBtns=isWork?`<span class="sv-flash" id="sf"><i class="ti ti-check"></i> Saved</span><button class="btn btn-s btn-sm" onclick="svProg()">Save</button><button class="btn btn-done btn-sm" onclick="mkDone()"><i class="ti ti-check"></i> Done</button>`:`<span class="badge badge-${cur.type}"><i class="ti ${m.icon}" style="font-size:10px"></i> ${m.label}</span>`;
+  const blocks=(cur.blocks||[]).map(b=>renderBView(b,cur.id,s?.color||'#1a2744')).join('');
+  return `<div style="display:flex;flex:1;overflow:hidden;height:100%"><div class="wb-sidebar">
+    <div class="wb-sbhdr">
+      <div class="wb-sbhdr-top"></div>
+      <button style="display:inline-flex;align-items:center;gap:4px;background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--t3);margin-bottom:8px;padding:0" onclick="st.cid=null;st.pid=null;renderMain()"><i class="ti ti-arrow-left" style="font-size:12px"></i> Back</button>
+      <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:1px">${esc(c.name)}</div>
+      <div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:6px">${esc(c.unit)}</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:10px;color:var(--t3)">${done}/${wp.length} done</span><span style="font-size:10px;font-weight:700;color:${s?.color||'var(--navy)'}">${pct}%</span></div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${s?.color||'var(--navy)'}"></div></div>
+    </div>
+    <div class="wb-sblist">${sbItems}</div>
+    <div style="padding:7px 10px;border-top:1px solid var(--bd);display:flex;gap:8px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:3px"><span class="wdot" style="background:${s?.color||'var(--done)'}"></span><span style="font-size:10px;color:var(--t3)">Done</span></div>
+      <div style="display:flex;align-items:center;gap:3px"><span class="wdot" style="background:var(--prog)"></span><span style="font-size:10px;color:var(--t3)">In progress</span></div>
+      <div style="display:flex;align-items:center;gap:3px"><span class="wdot" style="background:var(--bd2)"></span><span style="font-size:10px;color:var(--t3)">Not started</span></div>
+    </div>
+  </div>
+  <div class="wb-main">
+    <div class="wb-phdr">
+      <div class="wb-phdr-accent" style="background:${m.col}"></div>
+      <div class="wb-phdr-content">
+        <div><div style="font-size:10px;color:var(--t3);margin-bottom:1px">${esc(cur.section||'')}</div><div style="font-size:15px;font-weight:600">${esc(cur.title)}</div></div>
+        <div style="display:flex;gap:6px;align-items:center">${aBtns}</div>
+      </div>
+    </div>
+    <div class="wb-content" id="wbc" style="--subj-color:${s?.color||'#1a2744'}">
+      ${blocks||`<div style="text-align:center;padding:32px;color:var(--t3);font-size:13px">This page has no content yet.</div>`}
+    </div>
+    <div class="wb-nav">
+      <div class="pg-pill">
+        <button class="pgarr" onclick="wbN(-1)" ${ci===0?'disabled':''}><i class="ti ti-arrow-left" style="font-size:12px"></i></button>
+        <div class="pgdiv"></div>
+        <input class="pgni" type="number" min="1" max="${pages.length}" value="${ci+1}" onchange="wbJ(parseInt(this.value))" onkeydown="if(event.key==='Enter'){wbJ(parseInt(this.value));this.blur()}" onfocus="this.select()">
+        <div class="pgdiv"></div>
+        <button class="pgarr" onclick="wbN(1)" ${ci===pages.length-1?'disabled':''}><i class="ti ti-arrow-right" style="font-size:12px"></i></button>
+      </div>
+      <span style="font-size:12px;color:var(--t3)">of ${pages.length}</span>
+    </div>
+  </div></div>`;
+}
+function wbN(d){const c=gC(st.sid,st.cid);const ps=c?.pages||[];const i=ps.findIndex(p=>p.id===st.pid);const n=ps[i+d];if(n){st.pid=n.id;renderMain();}}
+function wbJ(n){const c=gC(st.sid,st.cid);const ps=c?.pages||[];if(n>=1&&n<=ps.length){st.pid=ps[n-1].id;renderMain();}}
+function svAns(k,v){db.answers[k]=v;const pid=k.split('-')[0];if(!db.progress[pid])db.progress[pid]='in_progress';save();}
+function svProg(){if(!db.progress[st.pid])db.progress[st.pid]='in_progress';save();flash();renderSB();}
+function mkDone(){db.progress[st.pid]='done';save();flash();renderSB();const c=gC(st.sid,st.cid);const ps=c?.pages||[];const i=ps.findIndex(p=>p.id===st.pid);if(i<ps.length-1){setTimeout(()=>{st.pid=ps[i+1].id;renderMain();},400);}else renderMain();}
+function flash(){const el=document.getElementById('sf');if(el){el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1700);}}
+
+//IMAGE UPLOAD
+function prevImg(input){
+  const file=input.files?.[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const image=new Image();
+    image.onload=function(){
+      const MAX=1200;
+      const ratio=Math.min(MAX/image.width,MAX/image.height,1);
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.round(image.width*ratio);
+      canvas.height=Math.round(image.height*ratio);
+      canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
+      const data=canvas.toDataURL('image/jpeg',0.85);
+      const prev=document.getElementById('img-prev');
+      const wrap=document.getElementById('img-prev-wrap');
+      const hid=document.getElementById('ef-imgdata');
+      if(prev)prev.src=data;
+      if(wrap)wrap.style.display='';
+      if(hid)hid.value=data;
+      // Warn if large
+      const kb=Math.round(data.length*0.75/1024);
+      if(kb>400) console.warn(`Image is ${kb}KB after compression. Large images may fill localStorage.`);
+    };
+    image.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function clearImg(){
+  const prev=document.getElementById('img-prev');
+  const wrap=document.getElementById('img-prev-wrap');
+  const hid=document.getElementById('ef-imgdata');
+  if(prev)prev.src='';
+  if(wrap)wrap.style.display='none';
+  if(hid)hid.value='';
+}
+// DELETE
+function closeMd(){document.getElementById('modal-ov').style.display='none';}
+function confDel(type,id,label){
+  const ov=document.getElementById('modal-ov');ov.style.display='flex';
+  ov.innerHTML=`<div class="modal" onclick="event.stopPropagation()"><h3>Delete ${type}?</h3><p>Delete "<strong>${esc(label)}</strong>"?${type==='subj'?' All workbooks and pages will be lost.':type==='chap'?' All pages inside will be deleted.':''}</p><div class="modal-acts"><button class="btn btn-s btn-sm" onclick="closeMd()">Cancel</button><button class="btn btn-sm" style="background:#dc2626;color:#fff;border-color:#dc2626" onclick="doDel('${type}','${id}')">Delete</button></div></div>`;
+}
+function doDel(type,id){
+  if(type==='subj'){db.subjects=db.subjects.filter(s=>s.id!==id);if(st.sid===id){st.sid=null;st.cid=null;st.pid=null;}}
+  else if(type==='chap'){const s=gS(st.sid);if(s)s.chapters=s.chapters.filter(c=>c.id!==id);if(st.cid===id){st.cid=null;st.pid=null;}}
+  else if(type==='page'){const c=gC(st.sid,st.cid);if(c)c.pages=c.pages.filter(p=>p.id!==id);if(st.pid===id)st.pid=null;}
+  save();closeMd();render();
+}
+
+// PRELOADED YEAR 10 ENGLISH CHAPTER 1 
+function buildCh1(){
+  const sid=uid(),cid=uid();
+  function pg(sec,title,type,blocks){return{id:uid(),section:sec,title,type,blocks};}
+  function b(type,data){return{id:uid(),type,...data};}
+
+  const pages=[
+    pg('Chapter Overview','Chapter 1 overview','lecture',[
+      b('infolist',{title:'Learning Focus — Learning Intention',items:['Understand the key terms associated with novels','Understand the term characterisation','Understand how setting (time and place) influences ideas and attitudes'],bg:'#e8ecf5',color:'#1a2744',bd:'#b8c4e0'}),
+      b('infolist',{title:'Learning Focus — Success Criteria (I can…)',items:['Define the key terms associated with a novel','Explain direct and indirect characterisation','Identify and explain the effect of language features'],bg:'#dbeafe',color:'#1d4ed8',bd:'#bfdbfe'}),
+      b('body',{text:'By the end of this chapter I will know:\n✅ WHAT I am learning\n✅ WHY it matters\n✅ HOW I\'ve been successful'}),
+    ]),
+
+    pg('Lecture Notes','Lecture Notes','lecture',[
+      b('vocab',{terms:'exposition, rising action, climax, falling action, resolution, protagonist, antagonist, foreshadowing'}),
+      b('body',{text:'Slide 1: This term, we will be studying the novel \'Of Mice and Men\' by John Steinbeck. You will be expected to read ahead of the Group Classes.'}),
+      b('youtube',{title:'Of Mice and Men — Videobook (Audiobook with Scrolling Text)',url:'https://www.youtube.com/watch?v=XmN43k0grIA',channel:'Full audiobook with scrolling text'}),
+      b('infolist',{title:'Slide 2: Terms associated with novels',items:['Plot — what happens and the sequence of events. Includes: Exposition, Rising action, Climax, Falling action, Resolution','Characters — protagonist, antagonist, major and minor characters, character development','Themes — the big ideas or messages in the novel (e.g. friendship, dreams, power, racism)','Language — how the writer uses words to create meaning (imagery, tone, dialogue, descriptive language)','Setting — where and when the story takes place; affects atmosphere and character','Structure — how the story is organised (chapters, foreshadowing, flashbacks, point of view)'],bg:'#f1f5f9',color:'#334155',bd:'#cbd5e1'}),
+      b('youtube',{title:'Steinbeck\'s Salinas Valley: Setting and Circumstance',url:'https://www.youtube.com/watch?v=XmN43k0grIA',channel:'Context for Of Mice and Men'}),
+      b('youtube',{title:'John Steinbeck — Author background',url:'https://www.youtube.com/watch?v=3irviknt-fg',channel:'Background on the author'}),
+      b('body',{text:'Slide 9: Characterisation\nIn \'Of Mice and Men\' we have two very distinct characters who are best friends: George and Lennie. In Chapter 1, Steinbeck characterises them for the reader.\n\nSlide 10: This week, you will need to read, or listen to, Chapter 1 of \'Of Mice and Men\'. You may want to take notes on the setting, characters, and foreshadowing.'}),
+    ]),
+
+    // Group Class 1
+    pg('Group Class 1','First impressions: George and Lennie','ignite',[
+      b('taskbox',{pageType:'ignite',name:'First impressions: George and Lennie'}),
+      b('body',{text:'In Chapter 1, Steinbeck develops the exposition by introducing the setting and main characters. He characterises George and Lennie through what they look like, what they say, what they do, and the interaction between them.'}),
+      b('body',{text:'First impressions\nAs we watch the video clip together, in your workbook take notes on what you find interesting about the characters and the relationship between them.'}),
+      b('question',{q:'What are your first impressions of George and Lennie from the video? What do you find interesting about them?',qn:null,marks:0,rows:5}),
+    ]),
+    pg('Group Class 1','Characterisation','explore',[
+      b('taskbox',{pageType:'explore',name:'Characterisation'}),
+      b('extract',{text:'They had walked in single file down the path, and even in the open one stayed behind the other. Both were dressed in denim trousers and in denim coats with brass buttons. Both wore black, shapeless hats and both carried tight blanket rolls slung over their shoulders. The first man was small and quick, dark of face, with restless eyes and sharp, strong features. Every part of him was defined: small, strong hands, slender arms, a thin and bony nose. Behind him walked his opposite, a huge man, shapeless of face, with large, pale eyes, and wide, sloping shoulders; and he walked heavily, dragging his feet a little, the way a bear drags his paws. His arms did not swing at his sides, but hung loosely.\n\nThe first man stopped short in the clearing, and the follower nearly ran over him. He took off his hat and wiped the sweat-band with his forefinger and snapped the moisture off. His huge companion dropped his blankets and flung himself down and drank from the surface of the green pool; drank with long gulps, snorting into the water like a horse.'}),
+      b('question',{q:'Steinbeck characterises both men through what they wear and carry. What does this tell us about them?',qn:1,marks:0,rows:4}),
+      b('question',{q:'George: What does the description of George suggest about his character?',qn:2,marks:0,rows:4}),
+      b('question',{q:'Lennie: It is clear that Lennie contrasts to George — "Behind him walked his opposite." In what ways is he different?',qn:3,marks:0,rows:4}),
+      b('question',{q:'Lennie is compared to two animals through a metaphor and a simile. What are the animals? What do they show about Lennie?',qn:4,marks:0,rows:4}),
+    ]),
+    pg('Group Class 1','Developing characters','apply',[
+      b('taskbox',{pageType:'apply',name:'Developing characters'}),
+      b('body',{text:'You have a choice of activities:\n\n• Go back to the original text and describe both George and Lennie using your own words. Then write a few sentences about the differences between them.\n\nOR\n\n• Describe two female characters and show, through their clothes and actions, that they are opposites or contrasts to one another. You can follow the same approach in your writing that Steinbeck has used.'}),
+      b('question',{q:'Describing George (use details from the text):',qn:null,marks:0,rows:5}),
+      b('question',{q:'Describing Lennie (use details from the text):',qn:null,marks:0,rows:5}),
+      b('question',{q:'The differences between George and Lennie:',qn:null,marks:0,rows:4}),
+    ]),
+    pg('Group Class 1','Sharing ideas','reflect',[
+      b('taskbox',{pageType:'reflect',name:'Sharing ideas'}),
+      b('question',{q:'After sharing your ideas with the class, explain what you have learnt about characterisation.',qn:null,marks:0,rows:6}),
+    ]),
+
+    // Group Class 2
+    pg('Group Class 2','Writing Dialogue','ignite',[
+      b('taskbox',{pageType:'ignite',name:'Writing Dialogue'}),
+      b('body',{text:'What have you learnt about writing dialogue? Add your bullet points below:'}),
+      b('question',{q:'Rules I know about writing dialogue (bullet points):',qn:null,marks:0,rows:6}),
+    ]),
+    pg('Group Class 2','Dialogue','explore',[
+      b('taskbox',{pageType:'explore',name:'Dialogue'}),
+      b('extract',{text:'Lennie spoke craftily, "Tell me — like you done before."\n"Tell you what?"\n"About the rabbits."\nGeorge snapped, "You ain\'t gonna put nothing over on me."\nLennie pleaded, "Come on, George. Tell me. Please, George. Like you done before."\n"You get a kick outa that, don\'t you? Awright, I\'ll tell you, and then we\'ll eat our supper…."\nGeorge\'s voice became deeper. He repeated his words rhythmically as though he had said them many times before. "Guys like us, that work on ranches, are the loneliest guys in the world. They got no fambly. They don\'t belong no place. They come to a ranch an\' work up a stake and then they go into town and blow their stake, and the first thing you know they\'re poundin\' their tail on some other ranch. They ain\'t got nothing to look ahead to."\nLennie was delighted. "That\'s it — that\'s it. Now tell how it is with us."\nGeorge went on. "With us it ain\'t like that. We got a future. We got somebody to talk to that gives a damn about us. We don\'t have to sit in no bar room blowin\' in our jack jus\' because we got no place else to go. If them other guys gets in jail they can rot for all anybody gives a damn. But not us."\nLennie broke in. "But not us! An\' why? Because… because I got you to look after me, and you got me to look after you, and that\'s why."'}),
+      b('question',{q:'Through the characters\' dialogue, Steinbeck develops important themes of the novel. What themes can you spot? Explain how the dialogue reveals them.',qn:1,marks:0,rows:5}),
+    ]),
+    pg('Group Class 2','Punctuating dialogue','apply',[
+      b('taskbox',{pageType:'apply',name:'Punctuating/writing dialogue'}),
+      b('body',{text:'Write out the lines below, adding all the correct punctuation:'}),
+      b('question',{q:'george said we\'ll get a little place of our own one day',qn:1,marks:0,rows:2}),
+      b('question',{q:'lennie replied an\' live off the fatta the lan',qn:2,marks:0,rows:2}),
+      b('question',{q:'dont shout at me george cried',qn:3,marks:0,rows:2}),
+      b('question',{q:'i wasnt shouting george said i was just talkin\'',qn:4,marks:0,rows:2}),
+      b('question',{q:'Extension: If you have time, write some dialogue of your own, continuing with the same characters and ideas from Group Class 1.',qn:null,marks:0,rows:6}),
+    ]),
+    pg('Group Class 2','Rules of writing dialogue','reflect',[
+      b('taskbox',{pageType:'reflect',name:'Rules of writing dialogue'}),
+      b('question',{q:'Write 3 rules that you need to follow when writing dialogue.',qn:null,marks:0,rows:6}),
+    ]),
+
+    // Group Class 3
+    pg('Group Class 3','Foreshadowing','ignite',[
+      b('taskbox',{pageType:'ignite',name:'Foreshadowing'}),
+      b('question',{q:'What do you already know or remember about foreshadowing from the lecture? Note your ideas below.',qn:null,marks:0,rows:5}),
+    ]),
+    pg('Group Class 3','Foreshadowing in Chapter 1','explore',[
+      b('taskbox',{pageType:'explore',name:'Foreshadowing in Chapter 1'}),
+      b('vocab',{terms:'ominous — sinister or suggestive of evil or wrongdoing'}),
+      b('question',{q:'Looking at the foreshadowing examples from the poster, identify one example of foreshadowing in Chapter 1. Write down the quotation.',qn:1,marks:0,rows:3}),
+      b('question',{q:'What future event or problem might this foreshadow?',qn:2,marks:0,rows:3}),
+    ]),
+    pg('Group Class 3','Unpacking foreshadowing','apply',[
+      b('taskbox',{pageType:'apply',name:'Unpacking foreshadowing'}),
+      b('body',{text:'In breakout rooms you will be given one example of foreshadowing from the poster to examine in greater depth. Find the relevant section in Chapter 1 and answer the following questions:'}),
+      b('question',{q:'What happens at this moment in the text?',qn:1,marks:0,rows:3}),
+      b('question',{q:'What future problem might this hint at?',qn:2,marks:0,rows:3}),
+      b('question',{q:'How does this make the reader feel?',qn:3,marks:0,rows:3}),
+      b('question',{q:'Why would Steinbeck plant this detail so early in the novel?',qn:4,marks:0,rows:3}),
+    ]),
+    pg('Group Class 3','Foreshadowing — reflection','reflect',[
+      b('taskbox',{pageType:'reflect',name:'Foreshadowing'}),
+      b('question',{q:'In a few sentences, explain how Steinbeck uses foreshadowing to prepare the reader for later events in the novel.',qn:null,marks:0,rows:6}),
+    ]),
+  ];
+
+  db.subjects.push({id:sid,name:'English',color:'#1a2744',bg:'#e8ecf5',icon:'book',chapters:[{id:cid,name:'Chapter 1',unit:'Of Mice and Men',pages}]});
+  st.sid=sid;st.cid=cid;st.pid=pages[2].id; // open on first Group Class 1 page
+  st.exS[sid]=true;st.exC[cid]=true;
+  save();render();
+}
+
+// INIT 
+load();
+loadTheme();
+if(db.subjects.length){
+  const s=db.subjects[0];st.sid=s.id;st.exS[s.id]=true;
+  const c=s.chapters?.[0];if(c){st.cid=c.id;st.exC[c.id]=true;const p=c.pages?.[0];if(p)st.pid=p.id;}
+} else {
+  buildCh1();
+}
+render();
+</script>
+</body>
+</html>
