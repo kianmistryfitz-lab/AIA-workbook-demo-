@@ -48,7 +48,9 @@ workbook (Of Mice and Men) built from the actual AIA PDF.
 
 How it was built
 
-I want to be upfront about this: I used Claude as a coding collaborator throughout this project. Claude wrote much of the implementation code based on my direction.
+I want to be upfront about this: I used Claude as a coding collaborator throughout this project. 
+Claude wrote much of the implementation code based on my direction, however I can 
+confedently explane how any part of this code works.
 
 What I actually did:
 Identified the problem from real experience as a student
@@ -59,9 +61,6 @@ Created the demo workbook
 Debugged issues and understood what was going wrong
 Wrote all the documentation
 
-Using AI as a development tool is increasingly how real software gets 
-built. I think being honest about it matters more than pretending 
-otherwise, and I guarantee you I can explain how any part of this code works.
 
 
 What's next
