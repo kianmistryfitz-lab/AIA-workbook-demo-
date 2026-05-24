@@ -54,6 +54,7 @@ Designed the UX to be as intuitive as possible.
 Created the demo workbook.
 Debugged issues and understood what was going wrong.
 Wrote all the documentation.
+I can also understand and explane any part of this code.
 
 
 What's next
